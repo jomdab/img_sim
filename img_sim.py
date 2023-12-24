@@ -99,3 +99,49 @@ early_stopping = EarlyStopping(monitor='val_loss', mode='min',verbose=1,patience
 checkpoint = ModelCheckpoint('encoder_model.h5', monitor='val_loss', mode='min', save_best_only=True)
 model.fit(train_data, train_data, epochs=35, batch_size=32,validation_data=(test_data,test_data),callbacks=[early_stopping,checkpoint])
 
+def feature_extraction(model, data, layer = 14):
+
+    """
+    Creating a function to run the initial layers of the encoder model. (to get feature extraction from any layer of the model)
+    Arguments:
+    model - (Auto encoder model) - Trained model
+    data - (np.ndarray) - list of images to get feature extraction from trained model
+    layer - (int) - from which layer to take the features(by default = 4)
+    Returns:
+    pooled_array - (np.ndarray) - array of extracted features of given images
+    """
+
+    encoded = K.function([model.layers[0].input],[model.layers[layer].output])
+    encoded_array = encoded([data])[0]
+    pooled_array = encoded_array.max(axis=-1)
+    return encoded_array
+
+encoded = feature_extraction(model,train_data[:10],9)
+
+knn = KNeighborsClassifier(n_neighbors=9,algorithm='ball_tree',n_jobs=-1)
+knn.fit(np.array(data),np.array(labels))
+
+def predictions(label,N=8,isurl=False):
+
+    """
+    Making predictions for the query images and returns N similar images from the dataset.
+    We can either pass filename or the url for the image.
+    Arguments:
+    label - (string) - file name of the query image.
+    N - (int) - Number of images to be returned
+    isurl - (string) - if query image is from google is set to True else False(By default = False)
+    """
+
+    if isurl:
+        img = io.imread(label)
+        img = cv2.resize(img,(224,224))
+    else:
+        img_path = '/content/dataset/'+label
+        img = image.load_img(img_path, target_size=(224,224))
+    img_data = image.img_to_array(img)
+    img_data = np.expand_dims(img_data,axis=0)
+    img_data = preprocess_input(img_data)
+    feature = model.predict(img_data)
+    feature = np.array(feature).flatten().reshape(1,-1)
+    res = knn.kneighbors(feature.reshape(1,-1),return_distance=True,n_neighbors=N)
+    results_(img,list(res[1][0])[1:])
