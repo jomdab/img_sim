@@ -14,7 +14,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
 #Extracting image paths
-train_files = os.listdir('train')
+train_files = os.listdir('train\output')
 test_files = os.listdir('test')
 
 print("Number of Training Images:",len(train_files))
@@ -22,10 +22,10 @@ print("Number of Test Images: ",len(test_files))
 train_files = pd.DataFrame(train_files,columns=['filepath'])
 test_files = pd.DataFrame(test_files,columns=['filepath'])
 
-#converting into .csv file for future reference.
-train_files.to_csv('train_file.csv')
-test_files.to_csv('test_file.csv')
-print(test_files)
+# #converting into .csv file for future reference.
+# train_files.to_csv('train_file.csv')
+# test_files.to_csv('test_file.csv')
+# print(test_files)
 
 def image2array(file_array,floder):
  """
@@ -38,7 +38,7 @@ def image2array(file_array,floder):
  image_array = []
  for path in tqdm(file_array['filepath']):
     if path != 'desktop.ini':
-      img = cv2.imread(floder+'/'+path)
+      img = cv2.imread(floder+'\\'+path)
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
       img = cv2.resize(img, (224,224))
       image_array.append(np.array(img))
@@ -48,7 +48,7 @@ def image2array(file_array,floder):
  image_array /= 255
  return np.array(image_array)
 
-train_data = image2array(train_files,"train")
+train_data = image2array(train_files,"train\output")
 print("Length of training dataset:",train_data.shape)
 test_data = image2array(test_files,"test")
 print("Length of test dataset:",test_data.shape)
