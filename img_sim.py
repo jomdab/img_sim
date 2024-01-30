@@ -14,10 +14,8 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
 #Extracting image paths
-file_path = os.listdir('dataset')
-print(len(file_path))
-
-train_files, test_files = train_test_split(file_path, test_size = 0.1)
+train_files = os.listdir('train')
+test_files = os.listdir('test')
 
 print("Number of Training Images:",len(train_files))
 print("Number of Test Images: ",len(test_files))
@@ -29,7 +27,7 @@ train_files.to_csv('train_file.csv')
 test_files.to_csv('test_file.csv')
 print(test_files)
 
-def image2array(file_array):
+def image2array(file_array,floder):
  """
  Reading and Converting images into numpy array by taking path of images.
  Arguments:
@@ -40,7 +38,7 @@ def image2array(file_array):
  image_array = []
  for path in tqdm(file_array['filepath']):
     if path != 'desktop.ini':
-      img = cv2.imread('dataset/'+path)
+      img = cv2.imread(floder+'/'+path)
       img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
       img = cv2.resize(img, (224,224))
       image_array.append(np.array(img))
@@ -50,9 +48,9 @@ def image2array(file_array):
  image_array /= 255
  return np.array(image_array)
 
-train_data = image2array(train_files)
+train_data = image2array(train_files,"train")
 print("Length of training dataset:",train_data.shape)
-test_data = image2array(test_files)
+test_data = image2array(test_files,"test")
 print("Length of test dataset:",test_data.shape)
 
 def encoder_decoder_model():

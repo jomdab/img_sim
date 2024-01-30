@@ -20,7 +20,7 @@ def rename_files_to_numbers(folder_path):
         print(f"Renamed: {old_path} -> {new_path}")
 
 # Replace 'dataset' with the actual path to your folder
-folder_path = 'dataset'
+folder_path = 'train/output'
 
 # Call the function to rename files
 rename_files_to_numbers(folder_path)
