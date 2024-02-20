@@ -3,6 +3,9 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
+import cv2
+
 
 def plot_(x,y1,y2,row,col,ind,title,xlabel,ylabel,label,isimage=False,color='b'):
 
@@ -44,8 +47,8 @@ print("Number of Test Images: ",len(test_files))
 train_files = pd.DataFrame(train_files,columns=['filepath'])
 test_files = pd.DataFrame(test_files,columns=['filepath'])
 
-X_encoded = np.load('/content/drive/My Drive/X_encoded_compressed.npy')
-X_encoded.shape
+X_encoded_reshape = np.load('/content/drive/My Drive/X_encoded_compressed.npy')
+X_encoded_reshape
 
 lisp=train_files
 lisp.extend(test_files)
@@ -53,8 +56,28 @@ print(len(lisp))
 
 transform = TSNE 
 trans = transform(n_components=2) 
-values = trans.fit_transform(X_encoded) 
+values = trans.fit_transform(X_encoded_reshape) 
 
-lisp=train_files
-lisp.extend(test_files)
-print(len(lisp))
+K = [4,5,6,7]
+for k in K:
+    print("if Number of clusters: "+str(k))
+    kmeans = KMeans(n_clusters = k, random_state=0).fit(X_encoded_reshape)
+    labels=kmeans.labels_
+    centroids = kmeans.cluster_centers_
+    plt.figure(figsize=(10,5)) 
+    plt.subplot(1,1,1)
+    plt.scatter(values[:,0], values[:,1], c= kmeans.labels_.astype(float), s=50, alpha=0.5)
+    plt.scatter(centroids[:, 0], centroids[:, 1], c=None, s=50)
+    plt.show()
+    for row in range(k): 
+        iter=0
+        plt.figure(figsize=(13,3))
+        for i,iterator in enumerate(labels):
+            if iterator == row:
+                img = cv2.imread("/content/dataset/"+lisp[i])
+                img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+                plot_(img,"","",1,6,iter+1,"cluster="+str(row),"","","",True)
+                iter+=1
+            if iter>=5: break
+        plt.show()
+    print() 
